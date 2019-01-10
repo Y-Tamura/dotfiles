@@ -112,16 +112,17 @@ set wildmenu
 set history=100
 
 " マウス有効可
-if has('mouse')
-    set mouse=a
-    if has('mouse_sgr')
-        set ttymouse=sgr
-    elseif v:version > 703 || v:version is 703 && has('patch632')
-        set ttymouse=sgr
-    else
-        set ttymouse=xterm2
-    endif
-endif
+" コピペができなくなったので削除
+" if has('mouse')
+"     set mouse=a
+"     if has('mouse_sgr')
+"         set ttymouse=sgr
+"     elseif v:version > 703 || v:version is 703 && has('patch632')
+"         set ttymouse=sgr
+"     else
+"         set ttymouse=xterm2
+"     endif
+" endif
 
 " クリップボードからペースとする時はインデントをそのままに
 " orz...orz...orz...上手く動かない
@@ -151,4 +152,101 @@ autocmd FileType * setlocal formatoptions-=ro
 " ここまで
 " https://qiita.com/ahiruman5/items/4f3c845500c172a02935
 
+
+
+
+
+
+
+
+
+
+
+"" 全角スペースや文末のタブ、スペースがあればハイライト
+"highlight ZenkakuSpace cterm=underline ctermfg=green ctermbg=green
+highlight ZenkakuSpace cterm=underline ctermfg=green ctermbg=red
+match ZenkakuSpace /　\|\( \|   \)\+$/
+
+
+
+"ステータスラインの色
+highlight StatusLine term=NONE cterm=NONE ctermfg=black ctermbg=white
+
+"Ctrl+でタブ切り替え
+map <C-Tab> gt
+map <C-S-Tab> gT
+
+
+autocmd FileType php abbr <? <?php
+autocmd FileType php abbr <?php= <?php echo
+
+
+hi Folded term=bold ctermfg=5 ctermbg=0
+hi DiffText term=bold ctermfg=5 ctermbg=0
+hi FoldColumn term=bold ctermfg=5 ctermbg=0
+set foldtext=FoldTextEx()
+" 折り畳み時の文字列
+function FoldTextEx()
+    let line = getline(v:foldstart)
+
+
+    test
+
+    let line = substitute(line, '\(    \|\t\)\([^ \t]\)', '--- \2', 'g')
+    let line = substitute(line, "\t", '----', 'g')
+    let line = substitute(line, "    ", '----', 'g')
+    let line = substitute(line, '/\*\|\*/\| \?{{{\d\=', '', 'g')
+    " // }}}
+    return line . ' (lines ' . (v:foldend - v:foldstart + 1) . ') '
+endfunction
+"タブの入れ子をみる（4ぐらいが見やすい）
+"set foldcolumn=2
+"閉じたときのあまりの文字
+"set fillchars=fold:#
+
+
+" 文字列中のHTMLをハイライトする
+let php_htmlInStrings=1
+
+let php_folding=1
+
+" QuickBufのホットキー変更　<F3>
+let g:qb_hotkey = "<C-j>"
+
+
+
+" https://sites.google.com/site/fudist/Home/vim-nihongo-ban/-vimrc-sample
+""""""""""""""""""""""""""""""
+" 挿入モード時、ステータスラインの色を変更
+""""""""""""""""""""""""""""""
+let g:hi_insert = 'highlight StatusLine guifg=darkblue guibg=darkyellow gui=none ctermfg=blue ctermbg=yellow cterm=none'
+
+if has('syntax')
+    augroup InsertHook
+        autocmd!
+        autocmd InsertEnter * call s:StatusLine('Enter')
+        autocmd InsertLeave * call s:StatusLine('Leave')
+    augroup END
+endif
+
+let s:slhlcmd = ''
+function! s:StatusLine(mode)
+    if a:mode == 'Enter'
+        silent! let s:slhlcmd = 'highlight ' . s:GetHighlight('StatusLine')
+        silent exec g:hi_insert
+    else
+        highlight clear StatusLine
+        silent exec s:slhlcmd
+    endif
+endfunction
+
+function! s:GetHighlight(hi)
+    redir => hl
+    exec 'highlight '.a:hi
+    redir END
+    let hl = substitute(hl, '[\r\n]', '', 'g')
+    let hl = substitute(hl, 'xxx', '', '')
+    return hl
+endfunction
+""""""""""""""""""""""""""""""
 
