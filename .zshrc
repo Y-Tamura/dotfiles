@@ -4,6 +4,10 @@ export PATH="$PYENV_ROOT/bin:$PATH"
 eval "$(pyenv init -)"
 
 
+# iTerm2 color Japaneseque
+export CLICOLOR=1
+export LSCOLORS="GxFxCxDxBxegedabagaced"
+
 
 
 
